@@ -1,0 +1,10 @@
+{application, exometer_disk_log,
+ [
+  {description, "Simple disk_log based persistency layer for exomter."},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [ kernel, stdlib, exometer ]},
+  {included_applications, [ ]},
+  {env, [ ]}
+ ]}.
+
