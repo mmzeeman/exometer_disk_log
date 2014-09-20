@@ -18,7 +18,7 @@
 %% limitations under the License.
 %% Erlang diff-match-patch implementation
 
--module(exometer_report_disk_log).
+-module(exometer_report_rrets).
 -author("Maas-Maarten Zeeman <mmzeeman@xs4all.nl>").
 
 -behaviour(exometer_report).
@@ -40,25 +40,18 @@
 -include_lib("exometer/include/exometer.hrl").
 
 -record(state, {
-    log :: disk_log:log()
+    storage :: rrets:storage()
 }).
 
-%% calendar:datetime_to_gregorian_seconds({{1970,1,1},{0,0,0}}).
--define(UNIX_EPOCH, 62167219200).
-
 exometer_init(Opts) ->
-    DiskLogArgs = get_opt(disk_log_args, Opts),
+    RRetsArgs = get_opt(rrets_args, Opts),
 
-    case disk_log:open(DiskLogArgs) of
+    case rrets:open(RRetsArgs) of
         {error, _Reason}=Error ->
             lager:error("Error triggered while opening. Error: ~p.", [Error]),
             Error;
-        {ok, Log} -> 
-            {ok, #state{log=Log}};
-        {repaired, Log, {recovered, Rec}, {badbytes, Bad}} ->
-            lager:info("Repair triggered while opening ~s. "
-                "Info: ~p terms recovered, ~p bytes lost.", [Log, Rec, Bad]),
-            {ok, #state{log=Log}}
+        {ok, Storage} -> 
+            {ok, #state{storage=Storage}}
     end.
 
 exometer_subscribe(_Metric, _DataPoint, _Extra, _Interval, State) ->
@@ -67,20 +60,20 @@ exometer_subscribe(_Metric, _DataPoint, _Extra, _Interval, State) ->
 exometer_unsubscribe(_Metric, _DataPoint, _Extra, State) ->
     {ok, State}.
 
-exometer_report(Metric, DataPoint, _Extra, Value, #state{log=Log}=State) ->
-    Entry = {unix_time(), Metric, DataPoint, Value},
-    ok = disk_log:alog(Log, Entry),
+exometer_report(Metric, DataPoint, _Extra, Value, #state{storage=Storage}=State) ->
+    Entry = {Metric, DataPoint, Value},
+    rrets:log(Storage, Entry),
     {ok, State}.
 
-exometer_call(info, _From, #state{log=Log}=State) ->
-    Info = disk_log:info(Log),
+exometer_call(info, _From, #state{storage=Storage}=State) ->
+    Info = rrets:info(Storage),
     {reply, Info, State};
 exometer_call(Unknown, From, State) ->
     lager:info("Unknown call ~p from ~p", [Unknown, From]),
     {ok, State}.
 
-exometer_cast(sync, #state{log=Log}=State) ->
-    disk_log:sync(Log),
+exometer_cast(sync, #state{storage=Storage}=State) ->
+    rrets:sync(Storage),
     {ok, State};
 exometer_cast(Unknown, State) ->
     lager:info("Unknown cast: ~p", [Unknown]),
@@ -96,9 +89,8 @@ exometer_newentry(_Entry, State) ->
 exometer_setopts(_Metric, _Options, _Status, State) ->
     {ok, State}.
 
-exometer_terminate(_, #state{log=Log}) ->
-    ok = disk_log:close(Log),
-    ok.
+exometer_terminate(_, #state{storage=Storage}) ->
+    ok = rrets:close(Storage).
 
 %%
 %% Helpers
@@ -110,8 +102,3 @@ get_opt(K, Opts) ->
         false  -> error({required, K})
     end.
 
-unix_time() ->
-    datetime_to_unix_time(erlang:universaltime()).
-
-datetime_to_unix_time({{_,_,_},{_,_,_}}=DateTime) ->
-    calendar:datetime_to_gregorian_seconds(DateTime) - ?UNIX_EPOCH.

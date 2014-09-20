@@ -7,17 +7,15 @@
 exometer_disk_log_test() ->
     exometer:start(),
 
-    %% A wrap log reporter
-    DiskLogArgs = [
+    %% A rrets reporter
+    RRetsArgs = [
         {name, test_log},
         {file, "test_log"},
-        {size, {1024, 4}},
-        {type, wrap},
-        {format, internal} ],
+        {size, {1024, 4}} ],
 
     ok = exometer_report:add_reporter(reporter1, [
-            {module, exometer_report_disk_log},
-            {disk_log_args, DiskLogArgs}]),
+            {module, exometer_report_rrets},
+            {rrets_args, RRetsArgs}]),
     [{reporter1, _Pid}] = exometer_report:list_reporters(),
 
     %% 

@@ -1,0 +1,10 @@
+{application, exometer_rrets,
+ [
+  {description, "Simple rrets based persistency layer for exomter."},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [ kernel, stdlib, exometer, rrets ]},
+  {included_applications, [ ]},
+  {env, [ ]}
+ ]}.
+
