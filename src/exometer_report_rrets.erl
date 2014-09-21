@@ -1,7 +1,7 @@
 %% @author Maas-Maarten Zeeman <mmzeeman@xs4all.nl>
 %% @copyright 2014 Maas-Maarten Zeeman
 %%
-%% @doc Exometer_disk_log, a disk_log based persistency layer for exometer.
+%% @doc exometer_rrets, a rrets based persistency layer for exometer.
 %%
 %% Copyright 2014 Maas-Maarten Zeeman
 %%

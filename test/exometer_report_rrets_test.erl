@@ -1,5 +1,5 @@
 
--module(exometer_report_disk_log_test).
+-module(exometer_report_rrets_test).
 
 -include_lib("eunit/include/eunit.hrl").
 
