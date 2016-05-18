@@ -37,7 +37,7 @@
     exometer_setopts/4
 ]).
 
--include_lib("exometer/include/exometer.hrl").
+-include_lib("exometer_core/include/exometer.hrl").
 
 -record(state, {
     storage :: rrets:storage()
